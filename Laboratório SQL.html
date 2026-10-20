@@ -1,0 +1,328 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Laboratório SQL</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: bancada de trabalho — trilha de exercícios à esquerda, enunciado + editor + resultado à direita */
+:root{
+  --bg:#F3F5F7; --panel:#FFFFFF; --ink:#16202B; --mut:#5B6875; --line:#DCE2E8;
+  --accent:#0B6E8A; --accent-ink:#FFFFFF; --soft:#E3F0F4; --code-bg:#0F1A24; --code-fg:#E6EEF4;
+  --ok:#1F7A4D; --ok-bg:#E3F3EA; --bad:#B03A2E; --bad-bg:#FBE9E6; --warn:#9A6400; --warn-bg:#FFF3D9;
+  --lvl1:#1F7A4D; --lvl2:#B56A00; --lvl3:#A3342A;
+  --display:"Bricolage Grotesque", "IBM Plex Sans", system-ui, sans-serif;
+  --body:"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E151C; --panel:#151F29; --ink:#E4EAF0; --mut:#93A1AE; --line:#263443;
+  --accent:#4FB6D3; --accent-ink:#06222B; --soft:#16303B; --code-bg:#091017; --code-fg:#E6EEF4;
+  --ok:#5CCB92; --ok-bg:#12301F; --bad:#F08A7E; --bad-bg:#3A1A16; --warn:#F2C062; --warn-bg:#3A2C0F;
+  --lvl1:#5CCB92; --lvl2:#F2B45A; --lvl3:#F08A7E; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E151C; --panel:#151F29; --ink:#E4EAF0; --mut:#93A1AE; --line:#263443;
+  --accent:#4FB6D3; --accent-ink:#06222B; --soft:#16303B; --code-bg:#091017; --code-fg:#E6EEF4;
+  --ok:#5CCB92; --ok-bg:#12301F; --bad:#F08A7E; --bad-bg:#3A1A16; --warn:#F2C062; --warn-bg:#3A2C0F;
+  --lvl1:#5CCB92; --lvl2:#F2B45A; --lvl3:#F08A7E; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px}
+.wrap{max-width:1180px;margin:0 auto;display:grid;gap:18px}
+header{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:12px}
+h1{font-family:var(--display);font-size:clamp(26px,4vw,36px);line-height:1.05;margin:0;letter-spacing:-.01em;text-wrap:balance}
+.sub{color:var(--mut);margin:4px 0 0;max-width:60ch}
+.progress{display:grid;gap:6px;min-width:220px}
+.progress .lbl{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);display:flex;justify-content:space-between;font-variant-numeric:tabular-nums}
+.bar{height:8px;border-radius:99px;background:var(--line);overflow:hidden}
+.bar>i{display:block;height:100%;width:0;background:var(--ok);transition:width .3s}
+.main{display:grid;grid-template-columns:270px minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:820px){.main{grid-template-columns:minmax(0,1fr)}}
+nav{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px;position:sticky;top:max(12px,env(safe-area-inset-top,0px));max-height:calc(100vh - 32px);overflow:auto}
+@media (max-width:820px){nav{position:static;max-height:210px}}
+nav h3{font-size:11px;letter-spacing:.08em;text-transform:uppercase;margin:12px 8px 6px;display:flex;align-items:center;gap:6px}
+nav h3:first-child{margin-top:4px}
+nav h3 .sw{width:8px;height:8px;border-radius:2px}
+nav button{all:unset;box-sizing:border-box;display:grid;grid-template-columns:26px minmax(0,1fr) 16px;gap:6px;align-items:center;width:100%;padding:6px 8px;border-radius:8px;cursor:pointer;font-size:13.5px}
+nav button:hover{background:var(--soft)}
+nav button[aria-current="true"]{background:var(--accent);color:var(--accent-ink)}
+nav button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+nav .n{font-family:var(--mono);font-size:12px;opacity:.75;font-variant-numeric:tabular-nums}
+nav .st{width:10px;height:10px;border-radius:50%;border:1.5px solid var(--mut);justify-self:end}
+nav .st.done{background:var(--ok);border-color:var(--ok)}
+nav .free{margin-top:10px;border-top:1px solid var(--line);padding-top:8px}
+.work{display:grid;gap:14px;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;min-width:0}
+.eyebrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
+.pill{border-radius:99px;padding:2px 9px;font-weight:600;color:#fff;letter-spacing:.04em}
+.task{font-family:var(--display);font-size:clamp(19px,2.4vw,23px);line-height:1.25;margin:8px 0 0;text-wrap:balance;font-weight:600}
+details.schema{margin-top:12px}
+details.schema summary{cursor:pointer;color:var(--accent);font-weight:600;font-size:14px}
+.tables{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:10px}
+.tbl{border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13px}
+.tbl b{font-family:var(--mono);color:var(--accent)}
+.tbl small{display:block;color:var(--mut);margin-bottom:4px}
+.tbl code{font-family:var(--mono);font-size:12.5px}
+.tbl .c{display:flex;justify-content:space-between;gap:8px;border-top:1px dashed var(--line);padding:2px 0}
+.tbl .c span{color:var(--mut);font-size:12px}
+.editor{background:var(--code-bg);border-radius:12px;overflow:hidden;border:1px solid var(--line)}
+.edhead{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;color:#9FB2C2;font-family:var(--mono);font-size:12px;border-bottom:1px solid #22313F}
+textarea{display:block;width:100%;min-height:150px;resize:vertical;border:0;outline:0;background:var(--code-bg);color:var(--code-fg);font-family:var(--mono);font-size:14.5px;line-height:1.6;padding:12px 14px;tab-size:2}
+textarea:focus-visible{box-shadow:inset 0 0 0 2px var(--accent)}
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+.btn{font:600 14px var(--body);border-radius:9px;padding:9px 16px;cursor:pointer;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn:disabled{opacity:.5;cursor:wait}
+kbd{font-family:var(--mono);font-size:11px;border:1px solid currentColor;border-radius:4px;padding:0 4px;opacity:.8}
+.fb{border-radius:10px;padding:12px 14px;font-size:14.5px;display:grid;gap:4px}
+.fb.ok{background:var(--ok-bg);color:var(--ok)}
+.fb.bad{background:var(--bad-bg);color:var(--bad)}
+.fb.info{background:var(--warn-bg);color:var(--warn)}
+.fb.neutral{background:var(--soft);color:var(--ink)}
+.fb b{font-size:15.5px}
+.fb p{margin:0;color:var(--ink)}
+.reveal{border-left:3px solid var(--accent);padding:6px 0 6px 12px;display:grid;gap:6px}
+.reveal pre{margin:0;background:var(--code-bg);color:var(--code-fg);font-family:var(--mono);font-size:13.5px;padding:10px 12px;border-radius:8px;overflow-x:auto;white-space:pre-wrap}
+.res{overflow-x:auto;border:1px solid var(--line);border-radius:10px;max-height:380px;overflow-y:auto}
+table{border-collapse:collapse;width:100%;font-size:13.5px;font-variant-numeric:tabular-nums}
+th{position:sticky;top:0;background:var(--soft);text-align:left;font-family:var(--mono);font-weight:500;font-size:12.5px;padding:7px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:6px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+td.num{text-align:right;font-family:var(--mono)}
+td.null{color:var(--mut);font-style:italic}
+.meta{font-size:12.5px;color:var(--mut);margin:6px 2px 0}
+.hint{color:var(--mut);font-size:13px}
+footer{color:var(--mut);font-size:12.5px;max-width:80ch}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Laboratório SQL</h1>
+      <p class="sub">Escreva a consulta, aperte Executar e veja na hora se acertou. Mesma empresa da planilha de Excel: vendas, produtos e vendedores.</p>
+    </div>
+    <div class="progress" aria-live="polite">
+      <div class="lbl"><span>Seu progresso</span><span id="progTxt">0 de 0</span></div>
+      <div class="bar"><i id="progBar"></i></div>
+    </div>
+  </header>
+
+  <div class="main">
+    <nav id="nav" aria-label="Exercícios"></nav>
+
+    <div class="work">
+      <section class="card" id="taskCard">
+        <div class="eyebrow" id="eyebrow"></div>
+        <p class="task" id="task"></p>
+        <details class="schema" id="schemaBox">
+          <summary>Ver as tabelas e colunas disponíveis</summary>
+          <div class="tables" id="tables"></div>
+        </details>
+      </section>
+
+      <section class="editor">
+        <div class="edhead"><span>consulta.sql</span><span>Ctrl/⌘ + Enter executa</span></div>
+        <label for="sql" hidden>Sua consulta SQL</label>
+        <textarea id="sql" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea>
+      </section>
+
+      <div class="actions">
+        <button class="btn primary" id="run" disabled>Executar</button>
+        <button class="btn" id="hintBtn">Ver dica</button>
+        <button class="btn" id="gabBtn">Ver gabarito</button>
+        <button class="btn" id="nextBtn">Próximo exercício →</button>
+      </div>
+
+      <div id="fb" class="fb neutral"><b>Carregando o banco de dados…</b><p>Leva alguns segundos na primeira vez.</p></div>
+      <div id="reveal" class="reveal" hidden></div>
+      <section>
+        <div class="res" id="res"></div>
+        <p class="meta" id="meta"></p>
+      </section>
+    </div>
+  </div>
+
+  <footer>O banco roda dentro do seu navegador (SQLite). Nada que você digita sai daqui. Errou feio e apagou uma tabela? Recarregue a página que o banco volta ao original. Datas são texto no formato AAAA-MM-DD; em outros bancos (SQL Server, MySQL) os comandos de data mudam um pouco, mas SELECT, JOIN, GROUP BY, CTE e window functions são iguais.</footer>
+</div>
+
+<script>
+const SCHEMA = "CREATE TABLE produtos (codigo TEXT PRIMARY KEY, produto TEXT, categoria TEXT, preco REAL, estoque INTEGER);\nCREATE TABLE vendedores (nome TEXT PRIMARY KEY, regiao_base TEXT, admissao TEXT, meta_semestre REAL);\nCREATE TABLE vendas (id INTEGER PRIMARY KEY, data TEXT, vendedor TEXT, regiao TEXT, codigo TEXT, qtd INTEGER, total REAL);\nCREATE TABLE vendas_2025 (id INTEGER PRIMARY KEY, data TEXT, vendedor TEXT, regiao TEXT, codigo TEXT, qtd INTEGER, total REAL);\nCREATE TABLE funcionarios (matricula TEXT PRIMARY KEY, nome TEXT, departamento TEXT, cargo TEXT, salario REAL, admissao TEXT);\nINSERT INTO produtos VALUES ('P01','Notebook','Eletrônicos',3500,12);\nINSERT INTO produtos VALUES ('P02','Mouse','Eletrônicos',80,140);\nINSERT INTO produtos VALUES ('P03','Monitor','Eletrônicos',900,35);\nINSERT INTO produtos VALUES ('P04','Cadeira','Móveis',750,20);\nINSERT INTO produtos VALUES ('P05','Mesa','Móveis',1200,15);\nINSERT INTO produtos VALUES ('P06','Caderno','Papelaria',25,400);\nINSERT INTO produtos VALUES ('P07','Caneta','Papelaria',5,1500);\nINSERT INTO produtos VALUES ('P08','Headset','Eletrônicos',250,60);\nINSERT INTO vendedores VALUES ('Ana','Sudeste','2021-02-01',60000);\nINSERT INTO vendedores VALUES ('Bruno','Sul','2020-05-11',60000);\nINSERT INTO vendedores VALUES ('Carla','Nordeste','2022-08-15',55000);\nINSERT INTO vendedores VALUES ('Diego','Sudeste','2019-03-04',70000);\nINSERT INTO vendedores VALUES ('Elisa','Centro-Oeste','2021-10-18',65000);\nINSERT INTO vendedores VALUES ('Felipe','Norte','2023-01-09',55000);\nINSERT INTO vendedores VALUES ('Gustavo','Sul','2026-06-01',30000);\nINSERT INTO vendas VALUES (1001,'2026-01-02','Diego','Sudeste','P08',5,1250);\nINSERT INTO vendas VALUES (1002,'2026-01-03','Diego','Centro-Oeste','P08',5,1250);\nINSERT INTO vendas VALUES (1003,'2026-01-05','Ana','Sul','P07',300,1500);\nINSERT INTO vendas VALUES (1004,'2026-01-06','Carla','Sudeste','P02',13,1040);\nINSERT INTO vendas VALUES (1005,'2026-01-07','Bruno','Sul','P06',81,2025);\nINSERT INTO vendas VALUES (1006,'2026-01-08','Bruno','Centro-Oeste','P01',2,7000);\nINSERT INTO vendas VALUES (1007,'2026-01-09','Elisa','Sul','P01',1,3500);\nINSERT INTO vendas VALUES (1008,'2026-01-13','Diego','Sudeste','P06',51,1275);\nINSERT INTO vendas VALUES (1009,'2026-01-15','Ana','Centro-Oeste','P02',17,1360);\nINSERT INTO vendas VALUES (1010,'2026-01-16','Carla','Sul','P02',3,240);\nINSERT INTO vendas VALUES (1011,'2026-01-18','Felipe','Sudeste','P02',20,1600);\nINSERT INTO vendas VALUES (1012,'2026-01-19','Carla','Norte','P01',1,3500);\nINSERT INTO vendas VALUES (1013,'2026-01-19','Bruno','Sudeste','P08',9,2250);\nINSERT INTO vendas VALUES (1014,'2026-01-19','Carla','Nordeste','P08',5,1250);\nINSERT INTO vendas VALUES (1015,'2026-01-21','Ana','Nordeste','P04',2,1500);\nINSERT INTO vendas VALUES (1016,'2026-01-22','Elisa','Sudeste','P07',85,425);\nINSERT INTO vendas VALUES (1017,'2026-01-22','Diego','Nordeste','P02',9,720);\nINSERT INTO vendas VALUES (1018,'2026-01-25','Bruno','Nordeste','P06',48,1200);\nINSERT INTO vendas VALUES (1019,'2026-01-25','Felipe','Sudeste','P03',4,3600);\nINSERT INTO vendas VALUES (1020,'2026-01-28','Elisa','Sul','P06',42,1050);\nINSERT INTO vendas VALUES (1021,'2026-01-29','Elisa','Sul','P02',8,640);\nINSERT INTO vendas VALUES (1022,'2026-01-29','Carla','Sudeste','P06',59,1475);\nINSERT INTO vendas VALUES (1023,'2026-01-29','Elisa','Nordeste','P05',3,3600);\nINSERT INTO vendas VALUES (1024,'2026-01-31','Diego','Nordeste','P05',2,2400);\nINSERT INTO vendas VALUES (1025,'2026-02-01','Ana','Sudeste','P07',339,1695);\nINSERT INTO vendas VALUES (1026,'2026-02-03','Ana','Centro-Oeste','P06',145,3625);\nINSERT INTO vendas VALUES (1027,'2026-02-04','Bruno','Nordeste','P06',87,2175);\nINSERT INTO vendas VALUES (1028,'2026-02-08','Ana','Nordeste','P06',21,525);\nINSERT INTO vendas VALUES (1029,'2026-02-10','Ana','Sul','P02',8,640);\nINSERT INTO vendas VALUES (1030,'2026-02-14','Elisa','Nordeste','P06',92,2300);\nINSERT INTO vendas VALUES (1031,'2026-02-16','Bruno','Nordeste','P07',62,310);\nINSERT INTO vendas VALUES (1032,'2026-02-16','Elisa','Centro-Oeste','P06',89,2225);\nINSERT INTO vendas VALUES (1033,'2026-02-17','Carla','Sudeste','P01',2,7000);\nINSERT INTO vendas VALUES (1034,'2026-02-19','Diego','Sudeste','P01',3,10500);\nINSERT INTO vendas VALUES (1035,'2026-02-19','Diego','Sul','P01',3,10500);\nINSERT INTO vendas VALUES (1036,'2026-02-20','Felipe','Sudeste','P03',5,4500);\nINSERT INTO vendas VALUES (1037,'2026-02-21','Bruno','Norte','P02',3,240);\nINSERT INTO vendas VALUES (1038,'2026-02-24','Felipe','Nordeste','P06',72,1800);\nINSERT INTO vendas VALUES (1039,'2026-02-24','Felipe','Sudeste','P06',87,2175);\nINSERT INTO vendas VALUES (1040,'2026-02-25','Carla','Sul','P01',2,7000);\nINSERT INTO vendas VALUES (1041,'2026-02-25','Carla','Sudeste','P03',3,2700);\nINSERT INTO vendas VALUES (1042,'2026-02-26','Felipe','Sul','P06',90,2250);\nINSERT INTO vendas VALUES (1043,'2026-02-27','Diego','Sudeste','P02',18,1440);\nINSERT INTO vendas VALUES (1044,'2026-02-28','Elisa','Sul','P01',1,3500);\nINSERT INTO vendas VALUES (1045,'2026-03-01','Carla','Sudeste','P01',1,3500);\nINSERT INTO vendas VALUES (1046,'2026-03-01','Diego','Sudeste','P02',8,640);\nINSERT INTO vendas VALUES (1047,'2026-03-02','Carla','Sul','P07',244,1220);\nINSERT INTO vendas VALUES (1048,'2026-03-03','Bruno','Sul','P02',17,1360);\nINSERT INTO vendas VALUES (1049,'2026-03-03','Elisa','Sul','P04',4,3000);\nINSERT INTO vendas VALUES (1050,'2026-03-04','Ana','Nordeste','P07',90,450);\nINSERT INTO vendas VALUES (1051,'2026-03-04','Felipe','Nordeste','P02',6,480);\nINSERT INTO vendas VALUES (1052,'2026-03-04','Diego','Nordeste','P06',145,3625);\nINSERT INTO vendas VALUES (1053,'2026-03-04','Bruno','Sudeste','P02',4,320);\nINSERT INTO vendas VALUES (1054,'2026-03-06','Felipe','Sul','P06',87,2175);\nINSERT INTO vendas VALUES (1055,'2026-03-06','Elisa','Centro-Oeste','P06',110,2750);\nINSERT INTO vendas VALUES (1056,'2026-03-06','Diego','Centro-Oeste','P02',5,400);\nINSERT INTO vendas VALUES (1057,'2026-03-06','Diego','Sudeste','P07',112,560);\nINSERT INTO vendas VALUES (1058,'2026-03-09','Ana','Sudeste','P02',10,800);\nINSERT INTO vendas VALUES (1059,'2026-03-10','Elisa','Centro-Oeste','P08',3,750);\nINSERT INTO vendas VALUES (1060,'2026-03-10','Ana','Centro-Oeste','P02',13,1040);\nINSERT INTO vendas VALUES (1061,'2026-03-10','Ana','Sudeste','P05',3,3600);\nINSERT INTO vendas VALUES (1062,'2026-03-13','Elisa','Sudeste','P01',1,3500);\nINSERT INTO vendas VALUES (1063,'2026-03-16','Carla','Centro-Oeste','P02',12,960);\nINSERT INTO vendas VALUES (1064,'2026-03-18','Carla','Sul','P07',366,1830);\nINSERT INTO vendas VALUES (1065,'2026-03-18','Ana','Norte','P04',8,6000);\nINSERT INTO vendas VALUES (1066,'2026-03-18','Diego','Nordeste','P05',2,2400);\nINSERT INTO vendas VALUES (1067,'2026-03-23','Felipe','Nordeste','P08',4,1000);\nINSERT INTO vendas VALUES (1068,'2026-03-26','Carla','Nordeste','P03',4,3600);\nINSERT INTO vendas VALUES (1069,'2026-03-27','Felipe','Centro-Oeste','P06',51,1275);\nINSERT INTO vendas VALUES (1070,'2026-03-28','Felipe','Centro-Oeste','P07',260,1300);\nINSERT INTO vendas VALUES (1071,'2026-03-30','Carla','Sudeste','P02',8,640);\nINSERT INTO vendas VALUES (1072,'2026-04-04','Felipe','Sudeste','P06',137,3425);\nINSERT INTO vendas VALUES (1073,'2026-04-04','Felipe','Sul','P02',2,160);\nINSERT INTO vendas VALUES (1074,'2026-04-05','Bruno','Nordeste','P02',13,1040);\nINSERT INTO vendas VALUES (1075,'2026-04-05','Carla','Sudeste','P07',70,350);\nINSERT INTO vendas VALUES (1076,'2026-04-06','Elisa','Nordeste','P03',4,3600);\nINSERT INTO vendas VALUES (1077,'2026-04-06','Bruno','Norte','P02',5,400);\nINSERT INTO vendas VALUES (1078,'2026-04-07','Elisa','Sudeste','P06',20,500);\nINSERT INTO vendas VALUES (1079,'2026-04-08','Ana','Sul','P03',2,1800);\nINSERT INTO vendas VALUES (1080,'2026-04-09','Elisa','Sudeste','P01',2,7000);\nINSERT INTO vendas VALUES (1081,'2026-04-09','Elisa','Sul','P06',64,1600);\nINSERT INTO vendas VALUES (1082,'2026-04-09','Carla','Sudeste','P03',4,3600);\nINSERT INTO vendas VALUES (1083,'2026-04-14','Ana','Sudeste','P06',104,2600);\nINSERT INTO vendas VALUES (1084,'2026-04-14','Bruno','Sudeste','P04',1,750);\nINSERT INTO vendas VALUES (1085,'2026-04-15','Carla','Sudeste','P05',1,1200);\nINSERT INTO vendas VALUES (1086,'2026-04-15','Bruno','Norte','P06',139,3475);\nINSERT INTO vendas VALUES (1087,'2026-04-16','Bruno','Centro-Oeste','P08',3,750);\nINSERT INTO vendas VALUES (1088,'2026-04-17','Felipe','Nordeste','P04',1,750);\nINSERT INTO vendas VALUES (1089,'2026-04-18','Diego','Centro-Oeste','P01',2,7000);\nINSERT INTO vendas VALUES (1090,'2026-04-18','Elisa','Sudeste','P06',77,1925);\nINSERT INTO vendas VALUES (1091,'2026-04-19','Diego','Sudeste','P05',2,2400);\nINSERT INTO vendas VALUES (1092,'2026-04-19','Diego','Sudeste','P02',4,320);\nINSERT INTO vendas VALUES (1093,'2026-04-20','Bruno','Centro-Oeste','P02',16,1280);\nINSERT INTO vendas VALUES (1094,'2026-04-20','Ana','Sudeste','P07',72,360);\nINSERT INTO vendas VALUES (1095,'2026-04-20','Carla','Sudeste','P08',9,2250);\nINSERT INTO vendas VALUES (1096,'2026-04-21','Elisa','Nordeste','P06',37,925);\nINSERT INTO vendas VALUES (1097,'2026-04-22','Felipe','Sudeste','P07',360,1800);\nINSERT INTO vendas VALUES (1098,'2026-04-23','Diego','Sul','P03',3,2700);\nINSERT INTO vendas VALUES (1099,'2026-04-23','Felipe','Nordeste','P01',3,10500);\nINSERT INTO vendas VALUES (1100,'2026-04-23','Carla','Nordeste','P04',7,5250);\nINSERT INTO vendas VALUES (1101,'2026-04-25','Elisa','Sul','P04',4,3000);\nINSERT INTO vendas VALUES (1102,'2026-04-25','Diego','Sudeste','P03',5,4500);\nINSERT INTO vendas VALUES (1103,'2026-04-27','Elisa','Sul','P02',16,1280);\nINSERT INTO vendas VALUES (1104,'2026-04-28','Bruno','Sudeste','P02',10,800);\nINSERT INTO vendas VALUES (1105,'2026-04-29','Ana','Sul','P03',1,900);\nINSERT INTO vendas VALUES (1106,'2026-04-30','Diego','Sul','P06',101,2525);\nINSERT INTO vendas VALUES (1107,'2026-05-01','Felipe','Nordeste','P05',1,1200);\nINSERT INTO vendas VALUES (1108,'2026-05-02','Carla','Sudeste','P02',16,1280);\nINSERT INTO vendas VALUES (1109,'2026-05-03','Carla','Sul','P08',3,750);\nINSERT INTO vendas VALUES (1110,'2026-05-03','Felipe','Sudeste','P04',4,3000);\nINSERT INTO vendas VALUES (1111,'2026-05-04','Ana','Norte','P05',2,2400);\nINSERT INTO vendas VALUES (1112,'2026-05-06','Ana','Sudeste','P04',7,5250);\nINSERT INTO vendas VALUES (1113,'2026-05-11','Carla','Sul','P03',4,3600);\nINSERT INTO vendas VALUES (1114,'2026-05-11','Bruno','Nordeste','P04',8,6000);\nINSERT INTO vendas VALUES (1115,'2026-05-12','Bruno','Sudeste','P02',20,1600);\nINSERT INTO vendas VALUES (1116,'2026-05-15','Carla','Sul','P04',4,3000);\nINSERT INTO vendas VALUES (1117,'2026-05-16','Bruno','Sudeste','P06',45,1125);\nINSERT INTO vendas VALUES (1118,'2026-05-18','Diego','Sudeste','P06',61,1525);\nINSERT INTO vendas VALUES (1119,'2026-05-18','Elisa','Sul','P01',2,7000);\nINSERT INTO vendas VALUES (1120,'2026-05-19','Diego','Centro-Oeste','P06',139,3475);\nINSERT INTO vendas VALUES (1121,'2026-05-20','Bruno','Sudeste','P07',97,485);\nINSERT INTO vendas VALUES (1122,'2026-05-20','Ana','Sudeste','P01',2,7000);\nINSERT INTO vendas VALUES (1123,'2026-05-20','Bruno','Nordeste','P01',2,7000);\nINSERT INTO vendas VALUES (1124,'2026-05-23','Bruno','Sudeste','P03',1,900);\nINSERT INTO vendas VALUES (1125,'2026-05-23','Ana','Sudeste','P06',22,550);\nINSERT INTO vendas VALUES (1126,'2026-05-25','Diego','Sudeste','P02',19,1520);\nINSERT INTO vendas VALUES (1127,'2026-05-26','Elisa','Sudeste','P08',2,500);\nINSERT INTO vendas VALUES (1128,'2026-05-26','Bruno','Sudeste','P08',2,500);\nINSERT INTO vendas VALUES (1129,'2026-05-28','Diego','Centro-Oeste','P05',2,2400);\nINSERT INTO vendas VALUES (1130,'2026-05-28','Diego','Sudeste','P03',4,3600);\nINSERT INTO vendas VALUES (1131,'2026-05-31','Bruno','Sul','P03',2,1800);\nINSERT INTO vendas VALUES (1132,'2026-05-31','Bruno','Sudeste','P05',4,4800);\nINSERT INTO vendas VALUES (1133,'2026-05-31','Elisa','Sudeste','P08',1,250);\nINSERT INTO vendas VALUES (1134,'2026-06-01','Bruno','Nordeste','P02',2,160);\nINSERT INTO vendas VALUES (1135,'2026-06-01','Felipe','Nordeste','P02',4,320);\nINSERT INTO vendas VALUES (1136,'2026-06-02','Ana','Sudeste','P02',9,720);\nINSERT INTO vendas VALUES (1137,'2026-06-03','Elisa','Sudeste','P06',90,2250);\nINSERT INTO vendas VALUES (1138,'2026-06-06','Elisa','Nordeste','P04',4,3000);\nINSERT INTO vendas VALUES (1139,'2026-06-07','Ana','Nordeste','P08',9,2250);\nINSERT INTO vendas VALUES (1140,'2026-06-07','Diego','Sul','P07',87,435);\nINSERT INTO vendas VALUES (1141,'2026-06-09','Elisa','Sul','P01',3,10500);\nINSERT INTO vendas VALUES (1142,'2026-06-09','Felipe','Sudeste','P03',2,1800);\nINSERT INTO vendas VALUES (1143,'2026-06-09','Ana','Norte','P01',3,10500);\nINSERT INTO vendas VALUES (1144,'2026-06-11','Elisa','Sudeste','P03',5,4500);\nINSERT INTO vendas VALUES (1145,'2026-06-11','Felipe','Sul','P02',11,880);\nINSERT INTO vendas VALUES (1146,'2026-06-12','Diego','Sudeste','P05',4,4800);\nINSERT INTO vendas VALUES (1147,'2026-06-14','Bruno','Sudeste','P02',10,800);\nINSERT INTO vendas VALUES (1148,'2026-06-14','Felipe','Sudeste','P06',76,1900);\nINSERT INTO vendas VALUES (1149,'2026-06-16','Felipe','Sudeste','P01',2,7000);\nINSERT INTO vendas VALUES (1150,'2026-06-17','Diego','Sudeste','P03',5,4500);\nINSERT INTO vendas VALUES (1151,'2026-06-17','Bruno','Sudeste','P01',1,3500);\nINSERT INTO vendas VALUES (1152,'2026-06-18','Bruno','Sudeste','P04',8,6000);\nINSERT INTO vendas VALUES (1153,'2026-06-20','Elisa','Sul','P06',141,3525);\nINSERT INTO vendas VALUES (1154,'2026-06-22','Ana','Norte','P02',15,1200);\nINSERT INTO vendas VALUES (1155,'2026-06-25','Diego','Sudeste','P04',2,1500);\nINSERT INTO vendas VALUES (1156,'2026-06-25','Felipe','Sudeste','P07',186,930);\nINSERT INTO vendas VALUES (1157,'2026-06-27','Diego','Norte','P02',11,880);\nINSERT INTO vendas VALUES (1158,'2026-06-27','Ana','Centro-Oeste','P07',329,1645);\nINSERT INTO vendas VALUES (1159,'2026-06-29','Felipe','Nordeste','P08',9,2250);\nINSERT INTO vendas VALUES (1160,'2026-06-30','Elisa','Nordeste','P08',2,500);\nINSERT INTO vendas VALUES (1161,'2026-06-30','Diego','Sudeste','P09',2,1800);\nINSERT INTO vendas_2025 VALUES (511,'2025-07-16','Elisa','Sudeste','P02',5,400);\nINSERT INTO vendas_2025 VALUES (504,'2025-07-18','Bruno','Sudeste','P07',4,20);\nINSERT INTO vendas_2025 VALUES (502,'2025-07-25','Carla','Nordeste','P02',5,400);\nINSERT INTO vendas_2025 VALUES (510,'2025-07-25','Elisa','Nordeste','P04',3,2250);\nINSERT INTO vendas_2025 VALUES (503,'2025-08-24','Ana','Sudeste','P01',5,17500);\nINSERT INTO vendas_2025 VALUES (517,'2025-09-26','Bruno','Sul','P07',2,10);\nINSERT INTO vendas_2025 VALUES (501,'2025-10-10','Felipe','Sudeste','P06',2,50);\nINSERT INTO vendas_2025 VALUES (513,'2025-10-25','Carla','Sul','P08',5,1250);\nINSERT INTO vendas_2025 VALUES (520,'2025-10-25','Ana','Sudeste','P08',5,1250);\nINSERT INTO vendas_2025 VALUES (515,'2025-11-04','Carla','Nordeste','P05',5,6000);\nINSERT INTO vendas_2025 VALUES (512,'2025-11-14','Diego','Sul','P08',6,1500);\nINSERT INTO vendas_2025 VALUES (508,'2025-11-16','Ana','Nordeste','P07',2,10);\nINSERT INTO vendas_2025 VALUES (507,'2025-11-20','Bruno','Sul','P04',1,750);\nINSERT INTO vendas_2025 VALUES (505,'2025-11-22','Ana','Sudeste','P07',1,5);\nINSERT INTO vendas_2025 VALUES (506,'2025-11-27','Diego','Sudeste','P01',5,17500);\nINSERT INTO vendas_2025 VALUES (516,'2025-12-03','Ana','Sudeste','P08',3,750);\nINSERT INTO vendas_2025 VALUES (518,'2025-12-19','Ana','Nordeste','P07',1,5);\nINSERT INTO vendas_2025 VALUES (509,'2025-12-22','Bruno','Sudeste','P05',5,6000);\nINSERT INTO vendas_2025 VALUES (519,'2025-12-25','Carla','Nordeste','P06',3,75);\nINSERT INTO vendas_2025 VALUES (514,'2025-12-26','Bruno','Sudeste','P04',2,1500);\nINSERT INTO funcionarios VALUES ('F001','Mariana Souza','Vendas','Analista',4800,'2021-03-15');\nINSERT INTO funcionarios VALUES ('F002','Carlos Lima','Financeiro','Coordenador',8200,'2019-07-01');\nINSERT INTO funcionarios VALUES ('F003','Juliana Alves','RH','Analista',5100,'2022-01-10');\nINSERT INTO funcionarios VALUES ('F004','Rafael Costa','TI','Desenvolvedor',9500,'2020-09-21');\nINSERT INTO funcionarios VALUES ('F005','Beatriz Rocha','TI','Analista de Dados',7800,'2023-05-02');\nINSERT INTO funcionarios VALUES ('F006','Pedro Martins','Financeiro','Analista',5600,'2021-11-08');\nINSERT INTO funcionarios VALUES ('F007','Camila Ferreira','RH','Coordenadora',7900,'2018-04-16');\nINSERT INTO funcionarios VALUES ('F008','Lucas Ribeiro','Vendas','Vendedor',3900,'2024-02-19');\nINSERT INTO funcionarios VALUES ('F009','Fernanda Dias','TI','Gerente',13500,'2017-08-07');\nINSERT INTO funcionarios VALUES ('F010','Thiago Nunes','Financeiro','Gerente',12800,'2016-06-13');\nINSERT INTO funcionarios VALUES ('F011','Larissa Gomes','Vendas','Gerente',11900,'2019-10-28');\nINSERT INTO funcionarios VALUES ('F012','Gabriel Pinto','RH','Assistente',3200,'2025-01-06');";
+const EXS = [{"nivel": "Fundamentos", "tema": "SELECT *", "q": "Mostre TODAS as colunas e linhas da tabela produtos.", "dica": "SELECT * FROM tabela", "gab": "SELECT * FROM produtos;", "key": null, "why": "O * significa 'todas as colunas'. FROM diz de qual tabela."}, {"nivel": "Fundamentos", "tema": "SELECT colunas", "q": "Mostre só o nome do produto e o preço.", "dica": "Liste as colunas separadas por vírgula.", "gab": "SELECT produto, preco FROM produtos;", "key": null, "why": "Escolher colunas = esconder as colunas que não interessam, como ocultar colunas no Excel."}, {"nivel": "Fundamentos", "tema": "WHERE", "q": "Liste produto e preço dos produtos que custam MAIS de 500.", "dica": "WHERE coluna > valor", "gab": "SELECT produto, preco FROM produtos WHERE preco > 500;", "key": null, "why": "WHERE é o filtro: só passam as linhas em que a condição é verdadeira."}, {"nivel": "Fundamentos", "tema": "WHERE + AND", "q": "Liste o id e o total das vendas da região 'Sul' com total acima de 3000.", "dica": "Texto vai entre aspas simples: 'Sul'. Junte condições com AND.", "gab": "SELECT id, total FROM vendas WHERE regiao = 'Sul' AND total > 3000;", "key": null, "why": "AND = as duas condições ao mesmo tempo (igual ao E do Excel)."}, {"nivel": "Fundamentos", "tema": "ORDER BY", "q": "Liste produto e preço do MAIS caro para o MAIS barato.", "dica": "ORDER BY coluna DESC", "gab": "SELECT produto, preco FROM produtos ORDER BY preco DESC;", "key": 1, "why": "ORDER BY ordena. ASC = crescente (padrão), DESC = decrescente."}, {"nivel": "Fundamentos", "tema": "ORDER BY + LIMIT", "q": "Mostre o nome e o preço dos 3 produtos MAIS BARATOS.", "dica": "Ordene do menor para o maior e corte com LIMIT 3.", "gab": "SELECT produto, preco FROM produtos ORDER BY preco LIMIT 3;", "key": 1, "why": "LIMIT pega só as primeiras linhas. Ordenar antes é o que transforma em 'top 3'."}, {"nivel": "Fundamentos", "tema": "WHERE com datas", "q": "Liste id, data e total das vendas de MARÇO/2026.", "dica": "Datas estão como texto 'AAAA-MM-DD'. Use BETWEEN '2026-03-01' AND '2026-03-31'.", "gab": "SELECT id, data, total FROM vendas WHERE data BETWEEN '2026-03-01' AND '2026-03-31';", "key": null, "why": "BETWEEN inclui as duas pontas. É o SOMASES com data >= e <= do Excel."}, {"nivel": "Fundamentos", "tema": "COUNT / SUM / AVG", "q": "Em UMA linha: quantidade de vendas, soma do total e média do total (tabela vendas).", "dica": "SELECT COUNT(*), SUM(total), AVG(total) FROM ...", "gab": "SELECT COUNT(*), SUM(total), AVG(total) FROM vendas;", "key": null, "why": "Funções de agregação resumem várias linhas em uma só: CONT.VALORES, SOMA e MÉDIA do Excel."}, {"nivel": "Fundamentos", "tema": "GROUP BY", "q": "Mostre o faturamento (soma do total) por região.", "dica": "SELECT regiao, SUM(total) ... GROUP BY regiao", "gab": "SELECT regiao, SUM(total) AS faturamento FROM vendas GROUP BY regiao;", "key": null, "why": "GROUP BY cria um 'balde' por região e soma cada balde. É a Tabela Dinâmica do SQL."}, {"nivel": "Fundamentos", "tema": "GROUP BY + COUNT", "q": "Quantas vendas cada vendedor fez? Ordene do que mais vendeu para o que menos vendeu.", "dica": "COUNT(*) conta as linhas de cada grupo.", "gab": "SELECT vendedor, COUNT(*) AS qtd_vendas FROM vendas GROUP BY vendedor ORDER BY qtd_vendas DESC, vendedor;", "key": 1, "why": "Agrupa por vendedor, conta as linhas de cada grupo e ordena pelo resultado."}, {"nivel": "Fundamentos", "tema": "HAVING", "q": "Mostre os vendedores cujo faturamento passou de 60000 (vendedor e soma).", "dica": "Filtro DEPOIS do agrupamento = HAVING (não WHERE).", "gab": "SELECT vendedor, SUM(total) AS faturamento FROM vendas GROUP BY vendedor HAVING SUM(total) > 60000;", "key": null, "why": "WHERE filtra LINHAS antes de agrupar. HAVING filtra GRUPOS depois de agrupar."}, {"nivel": "Intermediário", "tema": "INNER JOIN", "q": "Liste id da venda, nome do produto e categoria (junte vendas com produtos pelo código).", "dica": "FROM vendas v JOIN produtos p ON v.codigo = p.codigo", "gab": "SELECT v.id, p.produto, p.categoria FROM vendas v INNER JOIN produtos p ON v.codigo = p.codigo;", "key": null, "why": "INNER JOIN cola as tabelas onde o código bate nos dois lados. A venda do P09 (fora do catálogo) some."}, {"nivel": "Intermediário", "tema": "JOIN + GROUP BY", "q": "Faturamento por CATEGORIA (a categoria está na tabela produtos).", "dica": "Junte primeiro, agrupe depois.", "gab": "SELECT p.categoria, SUM(v.total) AS faturamento FROM vendas v JOIN produtos p ON v.codigo = p.codigo GROUP BY p.categoria;", "key": null, "why": "É o PROCX + SOMASE do Excel em uma única consulta."}, {"nivel": "Intermediário", "tema": "LEFT JOIN", "q": "Liste TODOS os vendedores (tabela vendedores) e quantas vendas cada um fez, inclusive quem fez zero.", "dica": "Comece pela tabela que não pode perder linhas. Use COUNT(v.id), não COUNT(*).", "gab": "SELECT d.nome, COUNT(v.id) AS qtd_vendas FROM vendedores d LEFT JOIN vendas v ON v.vendedor = d.nome GROUP BY d.nome;", "key": null, "why": "LEFT JOIN mantém TODAS as linhas da esquerda. Gustavo aparece com 0 porque COUNT(v.id) ignora os vazios (NULL)."}, {"nivel": "Intermediário", "tema": "LEFT JOIN + IS NULL", "q": "Quais vendedores AINDA NÃO fizeram nenhuma venda? (só o nome)", "dica": "LEFT JOIN e depois WHERE v.id IS NULL.", "gab": "SELECT d.nome FROM vendedores d LEFT JOIN vendas v ON v.vendedor = d.nome WHERE v.id IS NULL;", "key": null, "why": "Quem não tem par do lado direito fica com NULL. Filtrar IS NULL acha os 'sem par'. Truque muito usado."}, {"nivel": "Intermediário", "tema": "RIGHT JOIN", "q": "Liste id da venda e nome do produto mantendo TODAS as vendas, mesmo as de produto fora do catálogo.", "dica": "produtos p RIGHT JOIN vendas v ON ... (ou o mesmo com LEFT JOIN invertendo a ordem).", "gab": "SELECT v.id, p.produto FROM vendas v LEFT JOIN produtos p ON v.codigo = p.codigo;", "key": null, "why": "RIGHT JOIN = LEFT JOIN com as tabelas trocadas de lugar. A venda 1161 (P09) aparece com produto NULL."}, {"nivel": "Intermediário", "tema": "UNION ALL", "q": "Empilhe id, data e total das vendas de 2025 (vendas_2025) com as de 2026 (vendas).", "dica": "SELECT ... FROM vendas_2025 UNION ALL SELECT ... FROM vendas", "gab": "SELECT id, data, total FROM vendas_2025 UNION ALL SELECT id, data, total FROM vendas;", "key": null, "why": "UNION empilha uma tabela embaixo da outra. As colunas precisam ser as mesmas, na mesma ordem."}, {"nivel": "Intermediário", "tema": "UNION", "q": "Liste as regiões que aparecem em vendas_2025 OU em vendas, sem repetir.", "dica": "UNION (sem ALL) remove as duplicadas.", "gab": "SELECT regiao FROM vendas_2025 UNION SELECT regiao FROM vendas;", "key": null, "why": "UNION ALL mantém repetidos (mais rápido). UNION remove repetidos (como o ÚNICO do Excel)."}, {"nivel": "Avançado", "tema": "CASE", "q": "Para cada venda mostre id, total e a faixa: 'Grande' (>= 5000), 'Média' (>= 1000) ou 'Pequena'.", "dica": "CASE WHEN ... THEN ... WHEN ... THEN ... ELSE ... END", "gab": "SELECT id, total, CASE WHEN total >= 5000 THEN 'Grande' WHEN total >= 1000 THEN 'Média' ELSE 'Pequena' END AS faixa FROM vendas;", "key": null, "why": "CASE é o SE do SQL. Ele testa de cima para baixo e para no primeiro WHEN verdadeiro."}, {"nivel": "Avançado", "tema": "CASE + GROUP BY", "q": "Quantas vendas há em cada faixa (Grande / Média / Pequena)?", "dica": "Agrupe pela expressão do CASE (ou pelo apelido).", "gab": "SELECT CASE WHEN total >= 5000 THEN 'Grande' WHEN total >= 1000 THEN 'Média' ELSE 'Pequena' END AS faixa, COUNT(*) AS qtd FROM vendas GROUP BY faixa;", "key": null, "why": "Você cria uma categoria nova na hora e já resume por ela."}, {"nivel": "Avançado", "tema": "Subquery", "q": "Liste id e total das vendas ACIMA da média geral de vendas.", "dica": "WHERE total > (SELECT AVG(total) FROM vendas)", "gab": "SELECT id, total FROM vendas WHERE total > (SELECT AVG(total) FROM vendas);", "key": null, "why": "A consulta de dentro roda primeiro e devolve um número (a média). A de fora usa esse número."}, {"nivel": "Avançado", "tema": "Subquery com IN", "q": "Liste id e total das vendas de produtos da categoria 'Móveis' (sem usar JOIN).", "dica": "WHERE codigo IN (SELECT codigo FROM produtos WHERE ...)", "gab": "SELECT id, total FROM vendas WHERE codigo IN (SELECT codigo FROM produtos WHERE categoria = 'Móveis');", "key": null, "why": "A subquery devolve uma LISTA de códigos; o IN pergunta 'está nessa lista?'."}, {"nivel": "Avançado", "tema": "CTE (WITH)", "q": "Usando WITH, calcule o faturamento por vendedor e mostre só quem ficou ACIMA da média dos vendedores.", "dica": "WITH tot AS (SELECT vendedor, SUM(total) AS fat FROM vendas GROUP BY vendedor) SELECT ... FROM tot WHERE fat > (SELECT AVG(fat) FROM tot)", "gab": "WITH tot AS (SELECT vendedor, SUM(total) AS fat FROM vendas GROUP BY vendedor) SELECT vendedor, fat FROM tot WHERE fat > (SELECT AVG(fat) FROM tot);", "key": null, "why": "CTE é uma 'tabela temporária com nome', como uma aba de Cálculos. Deixa a consulta legível em etapas."}, {"nivel": "Avançado", "tema": "ROW_NUMBER", "q": "Faça o ranking dos vendedores por faturamento: vendedor, faturamento e posição (1 = maior).", "dica": "ROW_NUMBER() OVER (ORDER BY SUM(total) DESC)", "gab": "SELECT vendedor, SUM(total) AS fat, ROW_NUMBER() OVER (ORDER BY SUM(total) DESC) AS posicao FROM vendas GROUP BY vendedor ORDER BY posicao;", "key": 2, "why": "Window functions calculam 'olhando a janela' de linhas sem juntar tudo numa só. ROW_NUMBER numera em ordem."}, {"nivel": "Avançado", "tema": "SUM OVER (acumulado)", "q": "Mostre o mês (AAAA-MM), o faturamento do mês e o ACUMULADO do ano.", "dica": "Agrupe por substr(data,1,7) e use SUM(SUM(total)) OVER (ORDER BY mes).", "gab": "SELECT substr(data,1,7) AS mes, SUM(total) AS fat, SUM(SUM(total)) OVER (ORDER BY substr(data,1,7)) AS acumulado FROM vendas GROUP BY mes ORDER BY mes;", "key": 0, "why": "O OVER (ORDER BY mes) vai somando linha a linha, como =SOMA($B$2:B2) arrastado no Excel."}, {"nivel": "Avançado", "tema": "PARTITION BY", "q": "Para cada venda mostre id, região, total e a posição dela DENTRO da sua região (RANK, maior = 1). Só as posições 1 de cada região.", "dica": "Calcule o RANK() OVER (PARTITION BY regiao ORDER BY total DESC) numa CTE e filtre posicao = 1 fora dela.", "gab": "WITH r AS (SELECT id, regiao, total, RANK() OVER (PARTITION BY regiao ORDER BY total DESC) AS posicao FROM vendas) SELECT id, regiao, total, posicao FROM r WHERE posicao = 1;", "key": null, "why": "PARTITION BY reinicia o ranking a cada região (é o 'GROUP BY' das window functions). Não dá para filtrar window function no WHERE da mesma consulta, por isso a CTE."}, {"nivel": "Avançado", "tema": "LAG", "q": "Mostre mês, faturamento e o faturamento do mês ANTERIOR (para comparar crescimento).", "dica": "LAG(SUM(total)) OVER (ORDER BY mes)", "gab": "SELECT substr(data,1,7) AS mes, SUM(total) AS fat, LAG(SUM(total)) OVER (ORDER BY substr(data,1,7)) AS mes_anterior FROM vendas GROUP BY mes ORDER BY mes;", "key": 0, "why": "LAG 'espia' a linha de cima. Com ele dá para calcular variação: (fat - mes_anterior) / mes_anterior."}];
+const TABLES = [["vendas", "161 vendas de jan a jun/2026", [["id", "nº da venda"], ["data", "'AAAA-MM-DD'"], ["vendedor", "texto"], ["regiao", "texto"], ["codigo", "código do produto"], ["qtd", "inteiro"], ["total", "R$"]]], ["produtos", "catálogo (8 produtos)", [["codigo", "chave"], ["produto", "texto"], ["categoria", "texto"], ["preco", "R$"], ["estoque", "inteiro"]]], ["vendedores", "7 vendedores (Gustavo é novato)", [["nome", "chave"], ["regiao_base", "texto"], ["admissao", "data"], ["meta_semestre", "R$"]]], ["vendas_2025", "20 vendas do ano anterior", [["id", ""], ["data", ""], ["vendedor", ""], ["regiao", ""], ["codigo", ""], ["qtd", ""], ["total", ""]]], ["funcionarios", "12 pessoas do RH (livre)", [["matricula", "chave"], ["nome", ""], ["departamento", ""], ["cargo", ""], ["salario", "R$"], ["admissao", "data"]]]];
+const LVL = {"Fundamentos":"--lvl1","Intermediário":"--lvl2","Avançado":"--lvl3"};
+const SOURCES = [
+  "https://cdn.jsdelivr.net/npm/sql.js@1.10.3/dist/sql-asm.js",
+  "https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-asm.js",
+  "https://cdn.jsdelivr.net/npm/sql.js@1.8.0/dist/sql-asm.js"
+];
+const $ = id => document.getElementById(id);
+let db = null, cur = 0, FREE = -1, done = {}, drafts = {};
+
+function load(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } }
+function save(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+done = load("sqllab_done", {}); drafts = load("sqllab_drafts", {});
+
+function esc(s){ return String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+
+function buildNav(){
+  const nav = $("nav"); nav.innerHTML = ""; let lvl = "";
+  EXS.forEach((e,i) => {
+    if (e.nivel !== lvl){ lvl = e.nivel;
+      const h = document.createElement("h3");
+      h.innerHTML = `<span class="sw" style="background:var(${LVL[lvl]})"></span>${esc(lvl)}`;
+      nav.appendChild(h); }
+    const b = document.createElement("button");
+    b.innerHTML = `<span class="n">${String(i+1).padStart(2,"0")}</span><span>${esc(e.tema)}</span><span class="st ${done[i]?"done":""}" aria-label="${done[i]?"resolvido":"pendente"}"></span>`;
+    b.setAttribute("aria-current", i===cur ? "true":"false");
+    b.onclick = () => open(i);
+    nav.appendChild(b);
+  });
+  const f = document.createElement("div"); f.className = "free";
+  const fb = document.createElement("button");
+  fb.innerHTML = `<span class="n">∞</span><span>Modo livre</span><span></span>`;
+  fb.setAttribute("aria-current", cur===FREE ? "true":"false");
+  fb.onclick = () => open(FREE);
+  f.appendChild(fb); nav.appendChild(f);
+  const n = Object.keys(done).length;
+  $("progTxt").textContent = `${n} de ${EXS.length}`;
+  $("progBar").style.width = (100*n/EXS.length) + "%";
+}
+
+function buildTables(){
+  $("tables").innerHTML = TABLES.map(([t,desc,cols]) =>
+    `<div class="tbl"><b>${t}</b><small>${esc(desc)}</small>${cols.map(([c,d])=>`<div class="c"><code>${c}</code><span>${esc(d)}</span></div>`).join("")}</div>`).join("");
+}
+
+function open(i){
+  if (cur !== null) drafts[cur] = $("sql").value, save("sqllab_drafts", drafts);
+  cur = i; $("reveal").hidden = true;
+  if (i === FREE){
+    $("eyebrow").innerHTML = `<span class="pill" style="background:var(--accent)">Modo livre</span><span>sem correção</span>`;
+    $("task").textContent = "Explore à vontade. Teste qualquer consulta nas cinco tabelas.";
+    $("sql").value = drafts[FREE] ?? "SELECT *\nFROM funcionarios\nWHERE salario > 7000\nORDER BY salario DESC;";
+    $("hintBtn").hidden = $("gabBtn").hidden = true;
+  } else {
+    const e = EXS[i];
+    $("eyebrow").innerHTML = `<span class="pill" style="background:var(${LVL[e.nivel]})">${esc(e.nivel)}</span><span>Exercício ${i+1} de ${EXS.length} · ${esc(e.tema)}</span>${done[i]?'<span style="color:var(--ok)">✓ resolvido</span>':""}`;
+    $("task").textContent = e.q;
+    $("sql").value = drafts[i] ?? "";
+    $("hintBtn").hidden = $("gabBtn").hidden = false;
+  }
+  setFb("neutral", i===FREE ? "Modo livre" : "Sua vez", i===FREE ? "Aqui nada é corrigido: é o seu playground." : "Escreva a consulta no editor e aperte Executar.");
+  buildNav();
+  if (db) preview();
+}
+
+function preview(){
+  // mostra uma prévia útil enquanto a pessoa ainda não executou nada
+  const m = cur === FREE ? null : (EXS[cur].gab.match(/FROM\s+(\w+)/i) || [])[1];
+  const t = m || "funcionarios";
+  try{ const r = db.exec(`SELECT * FROM ${t} LIMIT 6`); renderTable(r[r.length-1]); $("meta").textContent = `Prévia: primeiras linhas da tabela ${t}.`; }catch(e){}
+}
+
+function setFb(kind, title, text){
+  const f = $("fb"); f.className = "fb " + kind;
+  f.innerHTML = `<b>${esc(title)}</b>${text ? `<p>${text}</p>` : ""}`;
+}
+
+function renderTable(r){
+  if (!r){ $("res").innerHTML = `<table><tbody><tr><td class="null">A consulta não devolveu nenhuma linha.</td></tr></tbody></table>`; return; }
+  const head = r.columns.map(c => `<th>${esc(c)}</th>`).join("");
+  const body = r.values.slice(0,500).map(row => "<tr>" + row.map(v =>
+    v === null ? `<td class="null">NULL</td>` : typeof v === "number" ? `<td class="num">${fmt(v)}</td>` : `<td>${esc(v)}</td>`).join("") + "</tr>").join("");
+  $("res").innerHTML = `<table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`;
+}
+function fmt(v){ return Number.isInteger(v) ? String(v) : v.toFixed(2); }
+
+function norm(v){ if (v === null || v === undefined) return "NULL"; if (typeof v === "number") return (Math.round(v*100)/100).toFixed(2); return String(v).trim(); }
+function rowKey(row){ return row.map(norm).slice().sort().join("¦"); }
+function multiset(rows){ const m = new Map(); rows.forEach(r => { const k = rowKey(r); m.set(k,(m.get(k)||0)+1); }); return m; }
+function sameMulti(a,b){ const A = multiset(a), B = multiset(b); if (A.size !== B.size) return false; for (const [k,v] of A) if (B.get(k) !== v) return false; return true; }
+
+function runQuery(sql){
+  const res = db.exec(sql);
+  return res.length ? res[res.length-1] : {columns:[], values:[]};
+}
+
+function check(e, user){
+  const exp = runQuery(e.gab);
+  const uc = user.columns.length, ec = exp.columns.length;
+  if (uc !== ec) return {ok:false, msg:`Você trouxe ${uc} coluna${uc===1?"":"s"}; o esperado são ${ec} (${exp.columns.join(", ")}).`};
+  if (user.values.length !== exp.values.length) return {ok:false, msg:`Você trouxe ${user.values.length} linha${user.values.length===1?"":"s"}; o esperado são ${exp.values.length}. Confira o filtro (WHERE/HAVING) ou o tipo de JOIN.`};
+  if (!sameMulti(user.values, exp.values)) return {ok:false, msg:"O número de linhas e colunas bate, mas alguns valores estão diferentes. Confira a conta, o critério ou a coluna escolhida."};
+  if (e.key !== null && e.key !== undefined){
+    const want = exp.values.map(r => norm(r[e.key])).join("|");
+    let found = false;
+    for (let c = 0; c < uc; c++){ if (user.values.map(r => norm(r[c])).join("|") === want){ found = true; break; } }
+    if (!found) return {ok:false, msg:"Os dados estão certos, mas a ORDEM não. Este exercício pede ORDER BY (lembre: DESC = do maior para o menor)."};
+  }
+  return {ok:true};
+}
+
+function run(){
+  if (!db) return;
+  const sql = $("sql").value.trim();
+  if (!sql){ setFb("info","O editor está vazio","Digite uma consulta começando por SELECT."); return; }
+  drafts[cur] = $("sql").value; save("sqllab_drafts", drafts);
+  let user;
+  const t0 = performance.now();
+  try{ user = runQuery(sql); }
+  catch(err){
+    let tip = "";
+    const m = String(err.message || err);
+    if (/no such column/i.test(m)) tip = " Confira o nome da coluna em 'Ver as tabelas e colunas'.";
+    else if (/no such table/i.test(m)) tip = " Confira o nome da tabela (tudo minúsculo, sem acento).";
+    else if (/syntax error/i.test(m)) tip = " Verifique vírgulas, aspas simples e a ordem: SELECT → FROM → WHERE → GROUP BY → HAVING → ORDER BY.";
+    else if (/misuse of aggregate/i.test(m)) tip = " Filtro com SUM/COUNT vai no HAVING, não no WHERE.";
+    setFb("bad", "O banco não entendeu a consulta", esc(m) + tip);
+    $("res").innerHTML = ""; $("meta").textContent = ""; return;
+  }
+  renderTable(user.columns.length ? user : null);
+  $("meta").textContent = `${user.values.length} linha${user.values.length===1?"":"s"} · ${Math.round(performance.now()-t0)} ms`;
+  if (cur === FREE){ setFb("neutral","Consulta executada","Modo livre: sem correção."); return; }
+  const e = EXS[cur];
+  const r = check(e, user);
+  if (r.ok){
+    const first = !done[cur];
+    done[cur] = 1; save("sqllab_done", done);
+    setFb("ok", first ? "Acertou! ✓" : "Certo de novo ✓", "<strong>Por que funciona:</strong> " + esc(e.why));
+    buildNav();
+    $("eyebrow").insertAdjacentHTML("beforeend", first ? '<span style="color:var(--ok)">✓ resolvido</span>' : "");
+  } else {
+    setFb("bad", "Quase! Ainda não está certo", esc(r.msg));
+  }
+}
+
+$("run").onclick = run;
+$("sql").addEventListener("keydown", ev => {
+  if ((ev.ctrlKey || ev.metaKey) && ev.key === "Enter"){ ev.preventDefault(); run(); }
+  if (ev.key === "Tab" && !ev.shiftKey){ ev.preventDefault(); const t = ev.target, s = t.selectionStart; t.setRangeText("  ", s, t.selectionEnd, "end"); }
+});
+$("hintBtn").onclick = () => { if (cur===FREE) return; const r = $("reveal"); r.hidden = false; r.innerHTML = `<b>💡 Dica</b><div>${esc(EXS[cur].dica)}</div>`; };
+$("gabBtn").onclick = () => {
+  if (cur===FREE) return; const e = EXS[cur], r = $("reveal"); r.hidden = false;
+  let exp = ""; try{ const x = runQuery(e.gab); exp = `${x.values.length} linha${x.values.length===1?"":"s"} esperada${x.values.length===1?"":"s"}`; }catch(err){}
+  r.innerHTML = `<b>Gabarito</b><pre>${esc(e.gab.replace(/ (FROM|WHERE|GROUP BY|HAVING|ORDER BY|LIMIT|INNER JOIN|LEFT JOIN|JOIN|UNION ALL|UNION|SELECT) /g, "\n$1 "))}</pre><div>${esc(e.why)}</div><div class="hint">${exp}. Tente digitar você mesma em vez de copiar: é isso que fixa.</div>`;
+};
+$("nextBtn").onclick = () => open(cur === FREE ? 0 : (cur + 1) % EXS.length);
+
+buildTables();
+cur = Object.keys(done).length < EXS.length ? (EXS.findIndex((_,i) => !done[i])) : 0;
+const startAt = cur; cur = null; open(startAt);
+
+(async function boot(){
+  for (const src of SOURCES){
+    try{
+      await new Promise((ok, fail) => { const s = document.createElement("script"); s.src = src; s.onload = ok; s.onerror = fail; document.head.appendChild(s); });
+      const SQL = await window.initSqlJs();
+      db = new SQL.Database(); db.exec(SCHEMA);
+      $("run").disabled = false;
+      setFb("neutral", "Banco pronto", cur === FREE ? "Modo livre." : "Escreva a consulta no editor e aperte Executar.");
+      preview(); return;
+    }catch(err){ /* tenta a próxima fonte */ }
+  }
+  setFb("bad", "Não consegui carregar o banco de dados", "Verifique a internet e recarregue a página.");
+})();
+</script>
+
+</body></html>
